@@ -1,3 +1,4 @@
+import pickle
 from keras import backend as K
 from instancenormalization import InstanceNormalization
 from keras.layers import Input, Lambda, Add, Conv2D, Conv2DTranspose, Dropout, ReLU, LeakyReLU
@@ -145,7 +146,7 @@ class Agent(object):
         leaky_alpha = 0.2
 
         img = Input(shape=self.img_shape)
-        mid = Conv2D(filters, kernel_size=kernel_size, strides=2, padding='same')(img)
+        mid = Conv2D(filters, kernel_size=kernel_size, strides=2, padding='same')(img) # zero padding
         mid = LeakyReLU(leaky_alpha)(mid)
 
         for i in range(1, n_layers):
@@ -170,6 +171,7 @@ class Agent(object):
         fake = np.zeros(self.patch_D)
 
         for epoch in range(self.n_epochs):
+            alldata = []
             for i, (imgs_A, imgs_B) in enumerate(self.data_loader.load_batch(self.batch_size)):
                 # train discriminator
                 fake_A = self.g_BA.predict(imgs_B)
@@ -191,20 +193,39 @@ class Agent(object):
                 loss_g = self.combined.train_on_batch([imgs_A, imgs_B], [real, real, imgs_A, imgs_B, imgs_A, imgs_B])
 
                 elapse = time.time() - start_time
-                print("[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %05f "
-                    % (epoch, self.n_epochs, i, self.batch_size, loss_d[0], 100*loss_d[1], 
-                    loss_g[0], np.mean(loss_g[1:3]), np.mean(loss_g[3:5]), np.mean(loss_g[5:7]), elapse)) # two numbers' mean
+                temp = {}
+                temp['epoch'] = epoch  # existing key, so overwrite
+                temp['n_epochs'] = self.n_epochs  # new key, so add
+                temp['i'] = i
+                temp['batch_size'] = self.batch_size
+                temp['D_loss']=loss_d[0]
+                temp['acc'] = 100*loss_d[1]
+                temp['G_loss'] = float("{:.5f}".format(loss_g[0]))
+                temp['adv'] = float("{:.5f}".format(np.mean(loss_g[1:3])))
+                temp['recon'] = float("{:.5f}".format(np.mean(loss_g[3:5])))
+                temp['id'] = float("{:.5f}".format(np.mean(loss_g[5:7])))
+                alldata.append(temp)
+                # print("[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %05f "
+                #     % (epoch, self.n_epochs, i, self.batch_size, loss_d[0], 100*loss_d[1], 
+                #     loss_g[0], np.mean(loss_g[1:3]), np.mean(loss_g[3:5]), np.mean(loss_g[5:7]), elapse)) # two numbers' mean
+                print("Epoch %d, Batch %d" %(epoch, i))
                 # print(loss_g) # It will print out seven values
                 # save generated image samples
                 if i % save_interval == 0:
                     self.sample_images(epoch, i) # Where it saves the generated images
                     # self.combined.save('apple2orange_%d' %i) # Delete this for running the whole epoch
                     # self.save_model(i)
-            self.save_model(epoch)
+            if epoch % save_interval == 0:
+                self.save_model(epoch)
+            self.save_data(epoch, alldata)
     
     def save_model(self, epoch): 
         self.combined.save('apple2orange_epoch_%d' %epoch)
         print("Saved model to disk")
+
+    def save_data(self, epoch, alldata): 
+        pickle.dump( alldata, open( "data%d.p" %epoch, "wb" ) )
+        print("Saved data to disk")
 
     def sample_images(self, epoch, batch):
         save_path = os.path.join(self.save_dir, self.dataset_name)

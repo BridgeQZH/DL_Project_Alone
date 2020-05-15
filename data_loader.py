@@ -13,7 +13,7 @@ class DataLoader(object):
         self.img_cols = args.img_cols
         self.img_size = (self.img_rows, self.img_cols) # which is a tuple
         self.img_channels = args.img_channels
-        self.img_shape = (self.img_channels, self.img_rows, self.img_cols) # channel first?
+        # self.img_shape = (self.img_channels, self.img_rows, self.img_cols) # channel first?
 
         # dataset path
         self.dataset_dir = args.dataset_dir
@@ -58,7 +58,7 @@ class DataLoader(object):
             yield imgs_A, imgs_B
 
     # @param l: list of path of images to read
-    def read(self, l, resize=True):
+    def read(self, l, resize=True, flip = False):
         imgs = []
         for p in l:
             img = cv2.imread(p, cv2.IMREAD_COLOR)
@@ -67,9 +67,15 @@ class DataLoader(object):
             # print(type(img)) # <class 'numpy.ndarray'>
             # print(img.shape) # (256,256,3)
             img = img.astype(np.float)
+            # flip
+            if flip:
+                imgflipVertical = cv2.flip(img, 0)
+                imgflipHorizontal = cv2.flip(img, 1)
+                imgflipBoth = cv2.flip(img, -1)
             # resize
             if resize:
                 img = cv2.resize(img, self.img_size)
+            
             # TODO whether to flip the image or not
             imgs.append(img)
         # scale to [-1, 1]
