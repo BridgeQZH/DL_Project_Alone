@@ -229,7 +229,7 @@ class Agent(object):
 
     def sample_images(self, epoch, batch):
         save_path = os.path.join(self.save_dir, self.dataset_name)
-        save_path = os.path.join(save_path, '256')
+        save_path = os.path.join(save_path, '256monet')
         os.makedirs(save_path, exist_ok=True)
         r, c = 2, 3 # 2 rows and 3 columns
 
