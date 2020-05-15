@@ -220,7 +220,7 @@ class Agent(object):
             self.save_data(epoch, alldata)
     
     def save_model(self, epoch): 
-        self.combined.save('apple2orange_epoch_%d' %epoch)
+        self.combined.save('monet2photo_epoch_%d' %epoch)
         print("Saved model to disk")
 
     def save_data(self, epoch, alldata): 
