@@ -1,22 +1,14 @@
-import pickle
 from keras import backend as K
 from instancenormalization import InstanceNormalization
 from keras.layers import Input, Lambda, Add, Conv2D, Conv2DTranspose, Dropout, ReLU, LeakyReLU
 from keras.models import Model
-# from keras.models import model_from_json
-# from keras.models import load_model
-# from tensorflow.keras.optimizers import Adam
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
+# from keras.optimizers import Adam
 import numpy as np
 import time, os
 import matplotlib.pyplot as plt
-from data_loader import DataLoader # from a python file's name import a class
+from data_loader import DataLoader
 
-''' 
-Some notations in this program
-    mse: mean_squared_error
-    mae: Mean Absolute Error
-'''
 class Agent(object):
     def __init__(self, args):
         '''
@@ -32,7 +24,7 @@ class Agent(object):
         self.img_channels = args.img_channels
         self.img_shape = (self.img_rows, self.img_cols, self.img_channels)
 
-        # weights for losses; different from the model's weights in the training process
+        # weights for losses
         self.lambda_cycle = args.lambda_cycle
         self.lambda_identity = args.lambda_identity * self.lambda_cycle
 
@@ -49,7 +41,6 @@ class Agent(object):
         self.dataset_dir = args.dataset_dir
         self.dataset_name = args.dataset_name
         self.save_dir = args.save_dir
-        self.modelsave_dir = args.modelsave_dir
 
         # data loader
         self.data_loader = DataLoader(args)
@@ -61,7 +52,7 @@ class Agent(object):
         self.d_B = self.build_disciminator()
         self.d_B.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
 
-        self.d_A.summary()
+        # self.d_A.summary()
 
         # patchGAN
         out_D = self.d_A.output.shape
@@ -71,7 +62,7 @@ class Agent(object):
         self.g_AB = self.build_generator()
         self.g_BA = self.build_generator()
 
-        self.g_AB.summary()
+        # self.g_AB.summary()
 
         img_A = Input(shape=self.img_shape)
         img_B = Input(shape=self.img_shape)
@@ -118,7 +109,7 @@ class Agent(object):
         mid = ReLU()(mid)
 
         sample = 2
-        # downsampling
+        # upsampling
         for i in range(1, sample+1):
             multi = 2**i
             mid = Conv2D(filters * multi, kernel_size=3, strides=2, padding='same')(mid)
@@ -129,7 +120,7 @@ class Agent(object):
         for i in range(n_blocks):
             mid = resnet_block(mid, filters * 2**sample)
 
-        # upsampling
+        # downsampling
         for i in range(1, sample+1):
             multi = 2**(sample-i)
             mid = Conv2DTranspose(filters * multi, kernel_size=3, strides=2, padding='same')(mid)
@@ -146,7 +137,7 @@ class Agent(object):
         leaky_alpha = 0.2
 
         img = Input(shape=self.img_shape)
-        mid = Conv2D(filters, kernel_size=kernel_size, strides=2, padding='same')(img) # zero padding
+        mid = Conv2D(filters, kernel_size=kernel_size, strides=2, padding='same')(img)
         mid = LeakyReLU(leaky_alpha)(mid)
 
         for i in range(1, n_layers):
@@ -164,14 +155,11 @@ class Agent(object):
         return Model(img, out)
 
     def train(self, save_interval=10):
-        # save_path = os.path.join(self.modelsave_dir, self.dataset_name)
-        # os.makedirs(save_path, exist_ok=True)
         start_time = time.time()
         real = np.ones(self.patch_D)
         fake = np.zeros(self.patch_D)
 
         for epoch in range(self.n_epochs):
-            alldata = []
             for i, (imgs_A, imgs_B) in enumerate(self.data_loader.load_batch(self.batch_size)):
                 # train discriminator
                 fake_A = self.g_BA.predict(imgs_B)
@@ -189,49 +177,22 @@ class Agent(object):
                 # total loss and accuracy
                 loss_d = 0.5 * np.add(loss_d_A, loss_d_B)
 
-                # train generator. self.combined is the model
+                # train generator
                 loss_g = self.combined.train_on_batch([imgs_A, imgs_B], [real, real, imgs_A, imgs_B, imgs_A, imgs_B])
 
                 elapse = time.time() - start_time
-                temp = {}
-                temp['epoch'] = epoch  # existing key, so overwrite
-                temp['n_epochs'] = self.n_epochs  # new key, so add
-                temp['i'] = i
-                temp['batch_size'] = self.batch_size
-                temp['D_loss']=loss_d[0]
-                temp['acc'] = 100*loss_d[1]
-                temp['G_loss'] = float("{:.5f}".format(loss_g[0]))
-                temp['adv'] = float("{:.5f}".format(np.mean(loss_g[1:3])))
-                temp['recon'] = float("{:.5f}".format(np.mean(loss_g[3:5])))
-                temp['id'] = float("{:.5f}".format(np.mean(loss_g[5:7])))
-                alldata.append(temp)
-                # print("[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %05f "
-                #     % (epoch, self.n_epochs, i, self.batch_size, loss_d[0], 100*loss_d[1], 
-                #     loss_g[0], np.mean(loss_g[1:3]), np.mean(loss_g[3:5]), np.mean(loss_g[5:7]), elapse)) # two numbers' mean
-                print("Epoch %d, Batch %d" %(epoch, i))
-                # print(loss_g) # It will print out seven values
+                print("[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %05f "
+                    % (epoch, self.n_epochs, i, self.data_loader.n_batches, loss_d[0], 100*loss_d[1], 
+                    loss_g[0], np.mean(loss_g[1:3]), np.mean(loss_g[3:5]), np.mean(loss_g[5:7]), elapse))
+
                 # save generated image samples
                 if i % save_interval == 0:
-                    self.sample_images(epoch, i) # Where it saves the generated images
-                    # self.combined.save('apple2orange_%d' %i) # Delete this for running the whole epoch
-                    # self.save_model(i)
-            if epoch % save_interval == 0:
-                self.save_model(epoch)
-            self.save_data(epoch, alldata)
+                    self.sample_images(epoch, i)
     
-    def save_model(self, epoch): 
-        self.combined.save('monet2photo_fliped_epoch_%d' %epoch)
-        print("Saved model to disk")
-
-    def save_data(self, epoch, alldata): 
-        pickle.dump( alldata, open("fliped_data%d.p" %epoch, "wb" ) )
-        print("Saved data to disk")
-
     def sample_images(self, epoch, batch):
         save_path = os.path.join(self.save_dir, self.dataset_name)
-        save_path = os.path.join(save_path, 'fliped_256monet')
         os.makedirs(save_path, exist_ok=True)
-        r, c = 2, 3 # 2 rows and 3 columns
+        r, c = 2, 3
 
         imgs_A = self.data_loader.load_random(domain='A', batch_size=1)
         imgs_B = self.data_loader.load_random(domain='B', batch_size=1)
