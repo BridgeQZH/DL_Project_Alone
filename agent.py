@@ -61,7 +61,7 @@ class Agent(object):
         self.d_B = self.build_disciminator()
         self.d_B.compile(loss='mse', optimizer=optimizer, metrics=['accuracy'])
 
-        # self.d_A.summary()
+        self.d_A.summary()
 
         # patchGAN
         out_D = self.d_A.output.shape
@@ -71,7 +71,7 @@ class Agent(object):
         self.g_AB = self.build_generator()
         self.g_BA = self.build_generator()
 
-        # self.g_AB.summary()
+        self.g_AB.summary()
 
         img_A = Input(shape=self.img_shape)
         img_B = Input(shape=self.img_shape)
@@ -220,16 +220,16 @@ class Agent(object):
             self.save_data(epoch, alldata)
     
     def save_model(self, epoch): 
-        self.combined.save('monet2photo_epoch_%d' %epoch)
+        self.combined.save('monet2photo_fliped_epoch_%d' %epoch)
         print("Saved model to disk")
 
     def save_data(self, epoch, alldata): 
-        pickle.dump( alldata, open( "data%d.p" %epoch, "wb" ) )
+        pickle.dump( alldata, open("fliped_data%d.p" %epoch, "wb" ) )
         print("Saved data to disk")
 
     def sample_images(self, epoch, batch):
         save_path = os.path.join(self.save_dir, self.dataset_name)
-        save_path = os.path.join(save_path, '256monet')
+        save_path = os.path.join(save_path, 'fliped_256monet')
         os.makedirs(save_path, exist_ok=True)
         r, c = 2, 3 # 2 rows and 3 columns
 

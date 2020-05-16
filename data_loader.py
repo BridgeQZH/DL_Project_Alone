@@ -58,7 +58,7 @@ class DataLoader(object):
             yield imgs_A, imgs_B
 
     # @param l: list of path of images to read
-    def read(self, l, resize=True, flip = False):
+    def read(self, l, resize=True, flip = True):
         imgs = []
         for p in l:
             img = cv2.imread(p, cv2.IMREAD_COLOR)
@@ -74,7 +74,7 @@ class DataLoader(object):
                 imgflipBoth = cv2.flip(img, -1)
             # resize
             if resize:
-                img = cv2.resize(img, self.img_size)
+                img = cv2.resize(imgflipBoth, self.img_size)
             
             # TODO whether to flip the image or not
             imgs.append(img)

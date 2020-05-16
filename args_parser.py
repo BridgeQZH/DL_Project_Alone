@@ -23,7 +23,7 @@ class Parser(object):
         self.parser.add_argument('--save_dir', type=str, default='./images', help='directory to save generated images')
         self.parser.add_argument('--modelsave_dir', type=str, default='./model', help='directory to save the model')
 
-        self.parser.add_argument('--n_epochs', type=int, default=90, help='# of training epochs')
+        self.parser.add_argument('--n_epochs', type=int, default=60, help='# of training epochs')
         self.parser.add_argument('--batch_size', type=int, default=1, help='batch size')
 
         return self.parser.parse_args()
