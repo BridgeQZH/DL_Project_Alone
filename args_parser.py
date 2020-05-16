@@ -20,17 +20,17 @@ class Parser(object):
         self.parser.add_argument('--dataset_name', type=str, default='apple2orange', help='dataset that network trains on')
         self.parser.add_argument('--save_dir', type=str, default='./images', help='directory to save generated images')
 
-        self.parser.add_argument('--n_epochs', type=int, default=1, help='# of training epochs')
+        self.parser.add_argument('--n_epochs', type=int, default=70, help='# of training epochs')
         self.parser.add_argument('--batch_size', type=int, default=1, help='batch size')
 
         self.parser.add_argument('--n_epochs_dis', type=int, default=20, help='# of training epochs for separate discriminator')
         self.parser.add_argument('--batch_size_dis', type=int, default=20, help='batch size for separate discriminator')
 
-        self.parser.add_argument('--resize', type=bool, default=False, help='whether to resize the image')
+        self.parser.add_argument('--resize', type=bool, default=True, help='whether to resize the image')
         self.parser.add_argument('--resize_size', type=int, default=286, help='resize image to this size')
-        self.parser.add_argument('--crop', type=bool, default=False, help='whether to crop the image')
+        self.parser.add_argument('--crop', type=bool, default=True, help='whether to crop the image')
         self.parser.add_argument('--crop_size', type=int, default=256, help='crop image to this size')
-        self.parser.add_argument('--flip', type=bool, default=False, help='whether to flip the image')
+        self.parser.add_argument('--flip', type=bool, default=True, help='whether to flip the image')
         self.parser.add_argument('--flip_prob', type=float, default=0.5, help='the probability to flip the image')
 
         return self.parser.parse_args()
