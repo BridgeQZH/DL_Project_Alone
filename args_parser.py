@@ -17,7 +17,7 @@ class Parser(object):
         self.parser.add_argument('--beta_1', type=float, default=0.5, help='momentum term for Adam')
 
         self.parser.add_argument('--dataset_dir', type=str, default='./datasets', help='directory of all datasets')
-        self.parser.add_argument('--dataset_name', type=str, default='apple2orange', help='dataset that network trains on')
+        self.parser.add_argument('--dataset_name', type=str, default='monet2photo', help='dataset that network trains on')
         self.parser.add_argument('--save_dir', type=str, default='./images', help='directory to save generated images')
 
         self.parser.add_argument('--n_epochs', type=int, default=70, help='# of training epochs')

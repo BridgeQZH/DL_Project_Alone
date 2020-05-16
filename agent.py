@@ -214,16 +214,16 @@ class Agent(object):
             self.save_data(epoch, alldata)
     
     def save_model(self, epoch): 
-        self.combined.save('new_monet2photo_fliped_epoch_%d' %epoch)
+        self.combined.save('nnew_monet2photo_fliped_epoch_%d' %epoch)
         print("Saved model to disk")
 
     def save_data(self, epoch, alldata): 
-        pickle.dump( alldata, open("new_fliped_data%d.p" %epoch, "wb" ) )
+        pickle.dump( alldata, open("nnew_fliped_data%d.p" %epoch, "wb" ) )
         print("Saved data to disk")
 
     def sample_images(self, epoch, batch):
         save_path = os.path.join(self.save_dir, self.dataset_name)
-        save_path = os.path.join(save_path, 'new_fliped_256monet')
+        save_path = os.path.join(save_path, 'nnew_fliped_256monet')
         os.makedirs(save_path, exist_ok=True)
         r, c = 2, 3
 
