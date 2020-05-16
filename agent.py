@@ -3,8 +3,8 @@ from keras import backend as K
 from instancenormalization import InstanceNormalization
 from keras.layers import Input, Lambda, Add, Conv2D, Conv2DTranspose, Dropout, ReLU, LeakyReLU
 from keras.models import Model
-from tensorflow.keras.optimizers import Adam
-# from keras.optimizers import Adam
+# from tensorflow.keras.optimizers import Adam
+from keras.optimizers import Adam
 import numpy as np
 import time, os
 import matplotlib.pyplot as plt
