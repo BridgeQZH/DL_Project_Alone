@@ -59,7 +59,7 @@ class Discriminator(object):
         out = Dense(1, activation='sigmoid')(mid)
         return Model(img, out)
 
-    def train(self, save_interval=2):
+    def train(self, save_interval=1):
         start_time = time.time()
         real = np.ones((self.batch_size, 1))
         fake = np.zeros((self.batch_size, 1))
@@ -74,7 +74,7 @@ class Discriminator(object):
                 print("[Epoch %d/%d] [Batch %d/%d] [loss: %05f, acc: %3d%%] time: %05f "
                     % (epoch, self.n_epochs, i, self.data_loader.n_batches, loss[0], 100*loss[1], elapse))
             if epoch % save_interval == 0:
-                self.discri.save('single_discri_epoch_%d' %epoch)
+                self.discri.save('new_single_discri_epoch_%d' %epoch)
    
 
 if __name__ == '__main__':
