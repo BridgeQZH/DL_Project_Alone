@@ -63,7 +63,7 @@ class Agent(object):
         self.g_AB = self.build_generator()
         self.g_BA = self.build_generator()
 
-        # self.g_AB.summary()
+        self.g_AB.summary()
 
         img_A = Input(shape=self.img_shape)
         img_B = Input(shape=self.img_shape)
@@ -82,6 +82,7 @@ class Agent(object):
         valid_B = self.d_B(fake_B)
 
         self.combined = Model(inputs=[img_A, img_B], outputs=[valid_A, valid_B, rec_A, rec_B, idt_A, idt_B])
+        # self.combined.summary()
         self.combined.compile(loss=['mse', 'mse', 'mae', 'mae', 'mae', 'mae'], 
             loss_weights=[1, 1, self.lambda_cycle, self.lambda_cycle, self.lambda_identity, self.lambda_identity], optimizer=optimizer)
 

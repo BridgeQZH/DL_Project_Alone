@@ -42,9 +42,9 @@ class DataLoader(object):
         return imgs
 
     def load_batch(self, batch_size=1):
-        path_A = os.path.join(self.dataset_dir, self.dataset_name, 'trainA/*')
+        path_A = os.path.join(self.dataset_dir, self.dataset_name, 'trainA_test/*')
         train_A = glob(path_A)
-        path_B = os.path.join(self.dataset_dir, self.dataset_name, 'trainB/*')
+        path_B = os.path.join(self.dataset_dir, self.dataset_name, 'trainB_test/*')
         train_B = glob(path_B)
 
         # number of times we return batches
